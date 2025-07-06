@@ -1,15 +1,23 @@
-const express = require('express');
-const app = express();
+import express from 'express'
+import dotenv from 'dotenv'
+import { login } from './controllers/usuarios.js'
+import { obtenerJugadores, registrarJugador } from './controllers/jugadores.js'
+import { obtenerEquipos, agregarEquipo } from './controllers/equipos.js'
+import verifyToken from './middlewares/auth.js'
 
-app.listen(3000, console.log("SERVER ON"));
+dotenv.config()
+
+const app = express()
 app.use(express.json())
 
-const { obtenerJugadores, registrarJugador } = require('./controllers/jugadores')
-const { obtenerEquipos, agregarEquipo } = require('./controllers/equipos')
-
-
+// Rutas
+app.post("/login", login)
 app.get("/equipos", obtenerEquipos)
-app.post("/equipos", agregarEquipo)
-
+app.post("/equipos", verifyToken, agregarEquipo)
 app.get("/equipos/:teamID/jugadores", obtenerJugadores)
-app.post("/equipos/:teamID/jugadores", registrarJugador)
+app.post("/equipos/:teamID/jugadores", verifyToken, registrarJugador)
+
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => console.log(`SERVER ON at http://localhost:${PORT}`))
+
+export default app

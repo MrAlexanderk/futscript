@@ -1,14 +1,25 @@
-const { getTeams, addTeam } = require('../db/consultas')
+import { getTeams, addTeam } from '../db/consultas.js'
 
-const obtenerEquipos = async (req, res) => {
+export const obtenerEquipos = async (req, res) => {
+  try {
     const equipos = await getTeams()
-    res.json(equipos)
+    res.status(200).json(equipos)
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los equipos' })
+  }
 }
 
-const agregarEquipo = async (req, res) => {
+export const agregarEquipo = async (req, res) => {
+  try {
     const equipo = req.body
-    await addTeam(equipo)
-    res.send({ message: "Equipo agregado con éxito" })
-}
 
-module.exports = { obtenerEquipos, agregarEquipo }
+    if (!equipo.name || equipo.name.trim() === '') {
+      return res.status(400).json({ message: 'El nombre del equipo es requerido' })
+    }
+
+    await addTeam(equipo)
+    res.status(201).json({ message: 'Equipo agregado con éxito' })
+  } catch (error) {
+    res.status(500).json({ error: 'Error al agregar el equipo' })
+  }
+}
